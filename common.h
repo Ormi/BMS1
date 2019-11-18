@@ -55,4 +55,13 @@ const uint8_t VIDEO_STREAM = 0x02; // not needed
 const uint8_t AUDIO_STREAM = 0x03; // not needed
 // Ends here
 
+class inputStreamReader {
+	public:
+		void openTS_Stream(string);
+		void readTS_Stream();
+	private:
+		ifstream inputTSFile;
+		ofstream outputTSFile;
+};
+
 #endif
