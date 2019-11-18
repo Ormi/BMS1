@@ -55,6 +55,13 @@ const uint8_t VIDEO_STREAM = 0x02; // not needed
 const uint8_t AUDIO_STREAM = 0x03; // not needed
 // Ends here
 
+// This magic number was taken from VUT FIT BMS Forum and documentation to project
+static const int magic_size = 188;
+
+class Demultiplexor {
+	uint32_t packets;
+};
+
 class inputStreamReader {
 	public:
 		void openTS_Stream(string);
@@ -62,6 +69,8 @@ class inputStreamReader {
 	private:
 		ifstream inputTSFile;
 		ofstream outputTSFile;
+		uint8_t buffer[magic_size];
+		Demultiplexor dmx;
 };
 
 #endif

@@ -12,17 +12,17 @@
  * BMS 2019/2020
  *
  */
-
+ 
 // Common definitions
 #include "common.h"
-
+ 
 // Common libraries
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <vector>
 #include <iomanip>
-
+ 
 using namespace std;
 
 /**
@@ -38,12 +38,27 @@ void inputStreamReader::openTS_Stream(string filename) {
 	string outputfile = filename.substr(0, eof).append(".txt");
 	outputTSFile.open(outputfile);
 }
-
-int main(int argc, char **argv) {
-	if (argc <= 1) {
-		cerr << "File missing" << endl;
-		return 1;
+ 
+/**
+ * Function for reading input .ts file
+ */ 
+void inputStreamReader::readTS_Stream() {
+    while(!inputTSFile.eof()) {
+        inputTSFile.read(reinterpret_cast<char*>(buffer), magic_size);
+        if(inputTSFile.gcount() != 188) {
+            break;
+		}
+        dmx.packets++;
 	}
-	inputStreamReader stream;
-	stream.openTS_Stream(argv[1]);
+}
+ 
+ 
+int main(int argc, char **argv) {
+    if (argc <= 1) {
+        cerr << "File missing" << endl;
+        return 1;
+    }
+    inputStreamReader stream;
+    stream.openTS_Stream(argv[1]);
+    stream.readTS_Stream();
 }
