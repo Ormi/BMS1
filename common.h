@@ -33,7 +33,7 @@ using namespace std;
 // Start here
 
 // Taken from Table 1, page 20
-const uint8_t PAT = 0x00;
+const uint8_t programAsociationTable = 0x00;
 const uint8_t CAT = 0x01; // not needed
 const uint8_t NIT = 0x10;
 const uint8_t SDT = 0x11;
@@ -110,7 +110,7 @@ class Demultiplexor {
 		bool parseServiceDescriptionTable(Packet &packet);
 		bool parseProgramMapTable(Packet &packet);
 
-		// Check in PAT table if there is packet
+		// Check in programAsociationTable table if there is packet
 		bool isPacketProgramMapTable (uint16_t PID);
 		// Print info about transport stdoutStream
 		void printFinalResults(ostream& stdoutStream);
@@ -126,9 +126,123 @@ class Demultiplexor {
 		map<uint16_t, set<uint16_t>> programElementary;
 		// Total packets
 		uint32_t packets;
+
+		string getBandwidth() { 
+			if (bandwidth < bandwidthTable.size()) {
+				return bandwidthTable[bandwidth];
+			} else {
+				return "Unknown";  
+			}
+		}
+		string getConstellation() { 
+			if (constellation < constellationCharacteristics.size()) {
+				return constellationCharacteristics[constellation];
+			} else {
+				return "Unknown";  
+			}
+		}			
+		string getGuardInterval() { 
+			if (guardInterval < guardIntervalTable.size()) {
+				return guardIntervalTable[guardInterval];
+			} else {
+				return "Unknown";  
+			}
+		}					
+		string getCodeRate() { 
+			if (codeRateHP < codeRateTable.size()) {
+				return codeRateTable[codeRateHP];
+			} else {
+				return "Unknown";  
+			}
+		}				
+
+		long double getBandwidthValue() { 
+			return bandwidthValue[bandwidth]; 
+		}
+		long double getModulationScheme() {
+			if (constellation == 0) {
+				return 1/(long double)4;
+			} else if (constellation == 1) {
+				return 1/(long double)2.0;
+			} else if (constellation == 2) {
+				return 3/(long double)4.0;
+			} else {
+				return 0.0;
+			}
+		}
+		long double getCodeRateValue() {
+			if (codeRateHP == 0) {
+				return 1/(long double)2.0;
+			} else if (codeRateHP == 1) {
+				return 2/(long double)3.0;
+			} else if (codeRateHP == 2) {
+				return 3/(long double)4.0;
+			} else if (codeRateHP == 3) {
+				return 5/(long double)6.0;
+			} else if (codeRateHP == 4) {
+				return 7/(long double)8.0;
+			} else {
+				return 0.0;
+			}
+		}
+		long double getGuardValue() {
+			if (guardInterval == 0) {
+					return 32/(long double)33.0;
+			} else if (guardInterval == 1) {
+					return 16/(long double)17.0;
+			} else if (guardInterval == 2) {
+					return 8/(long double)9.0;
+			} else if (guardInterval == 3) {
+					return 4/(long double)5.0;
+			} else {
+				return 0.0;
+			}
+		}
 	private:
-		bool parseDescriptors(Packet &packet, uint8_t offset, uint16_t length);
-		void parseServiceDescriptor(uint16_t offset, uint16_t length, uint16_t serviceID);
+		bool parseDescriptorsTable(Packet &packet, uint8_t offset, uint16_t length);
+		void parseServiceDescriptorTable(uint16_t offset, uint16_t length, uint16_t serviceID);
+		ofstream outputFile;
+		map<uint16_t, uint16_t> programAsociationTable;
+		bool newServiceDescriptorTable;
+		bool packetParser;
+		string networkName;
+		string serviceProviderName;
+		string serviceName;
+
+		uint16_t networkID;
+		
+		uint8_t bandwidth;
+		uint8_t constellation;
+		uint8_t codeRateHP;
+		uint8_t guardInterval;
+		
+		unsigned long totalBitrate;
+
+		vector<uint8_t> serviceDescriptorTableData;
+
+		// Taken from table 43 of reference document
+		vector<long double> bandwidthValue = { 8.0, 7.0, 6.0, 5.0, 1.7 };
+		vector<string> bandwidthTable = { "8 MHz", "7 MHz", "6 MHz", "5 MHz", "1,7 MHz"	};
+		// Taken from table 45 of reference document
+		vector<string> constellationCharacteristics = {"QPSK", "16-QAM", "64-QAM" };
+		// Taken from table 48 of reference document
+		vector<string> codeRateTable = { "1/2", "2/3", "3/4", "5/6", "7/8" };
+		// Taken from table 49 of reference document
+		vector<string> guardIntervalTable = { "1/32", "1/16", "1/8", "1/4" };
+
+		struct ProgramInfo {
+			uint16_t PID;
+			uint16_t serviceID;
+			string serviceProviderName;
+			string serviceName;
+			long double bitrate;
+
+			bool operator<(const ProgramInfo &a) const {
+				return PID < a.PID;
+			}
+
+		};
+		vector<ProgramInfo> programs;
 	};
 
 class inputStreamReader {

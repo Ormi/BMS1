@@ -75,7 +75,7 @@ void inputStreamReader::readTS_Stream() {
 		}
 
 		// Otherwise process it in Demultiplexor
-        if (!dmx.analyzeProgramAssociation  && packetTS.getPID() == PAT) {
+        if (!dmx.analyzeProgramAssociation  && packetTS.getPID() == programAsociationTable) {
             dmx.parseProgramAssociationTable (packetTS);
         }
         else if(!dmx.analyzeNetworkInformation && packetTS.getPID() == dmx.NITPid){
