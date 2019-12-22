@@ -1,5 +1,5 @@
 /**
- * @inputTSFile bms.cpp
+ * @file bms.cpp
  *
  * @brief This is main for BMS project Demultiplexing and analysis of DVBT transport stdoutStream
  *
@@ -75,22 +75,26 @@ void inputStreamReader::readTS_Stream() {
 		}
 
 		// Otherwise process it in Demultiplexor
+        if(packetTS.getPID() == SDT && !dmx.analyzeServiceDescription) {
+            dmx.parseServiceDescriptionTable(packetTS);
+        }
         if (!dmx.analyzeProgramAssociation  && packetTS.getPID() == programAsociationTable) {
             dmx.parseProgramAssociationTable (packetTS);
-        }
-        else if(!dmx.analyzeNetworkInformation && packetTS.getPID() == dmx.NITPid){
-            dmx.parseNetworkInformationTable(packetTS);
-        }
-        else if(packetTS.getPID() == SDT && !dmx.analyzeServiceDescription) {
-            dmx.parseServiceDescriptionTable(packetTS);
         }
         else if(dmx.analyzeProgramAssociation  && dmx.isPacketProgramMapTable (packetTS.getPID())) {
             dmx.parseProgramMapTable(packetTS);
         }
+        else if(!dmx.analyzeNetworkInformation && packetTS.getPID() == dmx.NITPid){
+            dmx.parseNetworkInformationTable(packetTS);
+        }        
     }
 	// Calculate bitrates from packet
     dmx.calculateBitrate();
-	// Delete unknown packet, map programs and calculate bitrate
+	// Delete unknown packet
+    dmx.deleteUnknowPackets();
+    // calculate bitrate
+    dmx.bitratesCalculation();
+    // bind maps
     dmx.bindMaps();
 	// Print final results to file or stdout for debug
     dmx.printFinalResults(outputTSFile);
@@ -131,7 +135,7 @@ bool Packet::packetParser() {
     payload.clear();
     packetHeader.synchronizationByte = rawData[0];
     if(packetHeader.synchronizationByte != 0x47) {
-        cerr << "Error sync byte\n";
+        cerr << "Error in synchronization byte\n";
         return RETURN_ERROR;
     }
     packetHeader.adaptationFieldDataDescriptor = rawData[3] >> 4 & 0x3;
@@ -160,7 +164,7 @@ bool Packet::packetParser() {
     inputStreamReader stdoutStream;
 
     if (argc <= 1) {
-        cerr << "File missing" << endl;
+        cerr << "You have to put at least one file argument" << endl;
         return RETURN_ERROR;
     }
     stdoutStream.openTS_Stream(argv[1]);

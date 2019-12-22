@@ -55,6 +55,10 @@ const uint8_t VIDEO_STREAM = 0x02; // not needed
 const uint8_t AUDIO_STREAM = 0x03; // not needed
 // Ends here
 
+const uint8_t HEXA_0 = 0x00;
+const uint8_t HEXA_15 = 0xF;
+const uint8_t HEXA_31 = 0x1F;
+
 // This magic number was taken from VUT FIT BMS Forum and documentation to project
 static const int packetLength = 188;
 
@@ -104,27 +108,26 @@ class Packet {
 class Demultiplexor {
 	public:
 		Demultiplexor();
-		void calculateBitrate();
 		bool parseNetworkInformationTable(Packet &packet);
 		bool parseProgramAssociationTable (Packet &packet);
 		bool parseServiceDescriptionTable(Packet &packet);
 		bool parseProgramMapTable(Packet &packet);
-
-		// Check in programAsociationTable table if there is packet
+		void printErrorOutput(string errorOutput);
 		bool isPacketProgramMapTable (uint16_t PID);
-		// Print info about transport stdoutStream
 		void printFinalResults(ostream& stdoutStream);
-		// Used for bind tables
-		void bindMaps();
+
+		void calculateBitrate();
+		void deleteUnknowPackets();
+		void bitratesCalculation();
+		void bindMaps();		
+
 		uint16_t NITPid;
-		bool analyzeNetworkInformation;
-		bool analyzeProgramAssociation ;
+		bool analyzeNetworkInformation;		
+		bool analyzeProgramAssociation;
 		bool analyzeServiceDescription;
-		// PID, packets
+
 		map<uint16_t, uint32_t> packetsCounter;
-		// From PMT packets
 		map<uint16_t, set<uint16_t>> programElementary;
-		// Total packets
 		uint32_t packets;
 
 		string getBandwidth() { 
@@ -237,8 +240,8 @@ class Demultiplexor {
 			string serviceName;
 			long double bitrate;
 
-			bool operator<(const ProgramInfo &a) const {
-				return PID < a.PID;
+			bool operator<(const ProgramInfo &channel) const {
+				return PID < channel.PID;
 			}
 
 		};

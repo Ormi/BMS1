@@ -1,26 +1,25 @@
 # BMS1
-Project for BMS - Wireless and Mobile Networks
 
+Console application for demultiplexing and analysis of transport stream of the DVB-T
 
-# Projekt 1
-Naprogramujte v jazyce C++/Python jednoduchou konzolovou aplikaci (bms1), která bude realizovat demultiplexing a analýzu transportního streamu vysílání digitální televize.
+## Installation
 
-# Parametry programu:
-./bms1 nazev_souboru.ts
+Use makefile
 
-# Funkce programu:
-Načítá vstupní soubor (nazev_souboru.ts), který obsahuje data transportního streamu DVB-T vysílání. Výstupem aplikace bude soubor s názvem nazev_souboru.txt, která bude obsahovat detaily pro každý vyextrahovaný kanál ze zpracovávaného transportního streamu.
+```c++
+make
+```
 
-# Obsah a formát výstupu
-*	Soubor bude obsahovat v hlavičce informace o zpracovávaném multiplexu získané z NIT servisní tabulky, detaily o jednotlivých programech získané z tabulek PAT a SDT, které budou doplněny o souhrnnou statistiku přenosové rychlosti pro 	všechny kanály, které patří k jednomu programu.
+or with debug mode (output to console)
 
-*	Každý řádek popisující jeden program multiplexu bude mít následující formát:
-PID-service_provider-service_name: <bitrate> Mbps
+```c++
+make debug
+```
 
-*	Jednotlivé řádky budou seřazeny podle hodnoty PID.
+## Usage
 
-*	Bitrate počítejte na základě počtu paketů daného programu vzhledem k celkovému počtu paketů. Teda podle vzorce:
-bitrate_programu = pocet_paketu_pro_program/celkovy_pocet_paketu*bitrate_streamu
-
-V případě, že program obsahuje více video/audio stop případně servisní informace, sčítejte bitrate všech těchto kanálu do společné hodnoty.
-*	Přenosovou rychlost zaokrouhlete na 2 desetinné místa.
+```c++
+./bms1 multiplex.ts
+```
+## License
+[BUTFIT]
