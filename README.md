@@ -21,5 +21,8 @@ make debug
 ```c++
 ./bms1 multiplex.ts
 ```
+
+The program will output result multiplex.txt next to input file multiplex.ts location.
+
 ## License
 [BUTFIT]
